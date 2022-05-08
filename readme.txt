@@ -1,4 +1,4 @@
-CSCI 6406 Visualization Project
+Visualization course project
 By Leah Isenor
 
 This is an implementation of Time Curves for visualizing wikipedia revision histories as presented in:
