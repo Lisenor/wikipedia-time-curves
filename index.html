@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      div {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 25;
+        outline:1px solid black;
+        padding: 10px;
+      }
+      button {
+        background-color: #86bfbc;
+      }
+    </style>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/mathjs@10.5.1/lib/browser/math.js"></script>
+    <title>Visualization Project</title>
+  </head>
+  <body>
+    
+    <div style="float: top; margin-left: 20px; margin-top: 25px; width: 721px; font-size: 30px;">Wikipedia Time Curve Generator</div>
+    <div style="float: left; margin-top: 1px; margin-left: 20px; height: 150px; width: 200px;">
+      Article title:
+      <input id = "articleTitle" placeholder="Enter article title" style="margin-top: 15px; width: 102px;">
+      <br>
+      Number of revisions:
+      <input type = "number" id = "limit" min = 2 max = 30 value="30" style="margin-top: 20px;">
+      <br>
+      <button id = "button" style="margin-left: 124px; margin-top: 20px; height: 38px; width: 70px; font-size: 20px;" onclick = "generateCurve()" id = "button">Draw</button>
+    </div>
+    <div class = "info" style="margin-top: 1px; margin-left: 241px; width: 500px; height: 150px;"></div>
+    <div class = "graph" style="padding: 0px; margin-left: 20px; margin-top: 1px; width: 741px; height: 500px;">
+      <p id = "progress" style = "position: absolute; padding: 10px;"></p>
+    </div>
+    <script type = "text/javascript">
+
+    function generateCurve(){
+
+      let title = document.getElementById("articleTitle");
+      let limit = document.getElementById("limit");
+      let value = parseInt(limit.value);
+      let min = parseInt(limit.min);
+      let max = parseInt(limit.max);
+
+      if (title.value == "") {
+        alert("Please enter the title of a Wikipedia article");
+        return;
+      }
+      if (!(value<=max && value>=min)){
+        alert("Number of revisions must be between "+min+" and "+max);
+        return;
+      }
+
+      d3.selectAll("svg").remove();
+
+      document.getElementById("button").disabled = true;
+      document.getElementById("progress").textContent = "Fetching revisions, this may take a few seconds...";
+
+      getRevisions(title.value,limit.value).then(function(response) {
+
+        var revisions = response;
+        document.getElementById("progress").textContent = "Fetching differences, this may take a few seconds...";
+
+        caculateRevisionDifferences(title.value,revisions).then(function(response) {
+
+          var differences = response;
+          var dataset = mdsClassic(differences);
+          timeCurves(dataset, differences, revisions);
+
+        }).catch(function(response) {
+          console.log(response)
+          alert(response);
+        });    
+      }).catch(function(response) {
+        console.log(response)
+        alert(response);
+      }).then(function(){
+          document.getElementById("button").disabled = false;
+          document.getElementById("progress").textContent = "";
+       }); 
+    }
+
+   </script>
+   <script src="helpMenu.js"></script>
+   <script src="diff.js"></script>
+   <script src="revisions.js"></script>
+   <script src="mds.js"></script>
+   <script src="customCurve.js"></script>
+   <script src="visualization.js"></script>
+  </body>
+</html>
